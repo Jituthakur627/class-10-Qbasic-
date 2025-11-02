@@ -1,0 +1,288 @@
+'===========================================================
+' PROGRAM NAME: SEE GRADE SHEET DATA ENTRY AND CALCULATION
+'===========================================================
+
+Cls
+Open "SHEET.DAT" For Append As #1
+
+Locate 1, 22: Print "DATA ENTRY FOR SEE GRADESHEET"
+Print
+Print
+
+Do
+    Input "ENTER THE SYMBOL NUMBER: ", S$
+    Input "ENTER THE DATE OF BIRTH (YYYY-MM-DD): ", D$
+
+    Print
+    Print
+
+    ' ======= FIRST INPUT BLOCK: THEORY MARKS ENTRY =======
+    FIRSTINPUT:
+    Print "DATA ENTRY OF MARKS ONLY IN THEORY"
+
+    Input "ENGLISH THEORY: ", ETH
+    Input "NEPALI THEORY: ", NTH
+    Input "COMPULSORY SCIENCE THEORY: ", STH
+    Input "SOCIAL STUDIES THEORY: ", SSTH
+    Input "HEALTH AND ENVIRONMENT THEORY: ", HPETH
+    Input "COMPUTER THEORY (?/50): ", O2TH
+    Print
+
+    ' ===== VALIDATION =====
+    IF (ETH < 0) OR (ETH > 75) OR (NTH < 0) OR (NTH > 75) OR _
+       (STH < 0) OR (STH > 75) OR (SSTH < 0) OR (SSTH > 75) OR _
+       (HPETH < 0) OR (HPETH > 75) OR (O2TH < 0) OR (O2TH > 50) THEN
+        Print "DATA ENTRY WAS WRONG. PLEASE RE-ENTER."
+        Print
+        GoTo FIRSTINPUT
+    End If
+
+    ' ======= SECOND INPUT BLOCK: PRACTICAL MARKS ENTRY =======
+    SECONDINPUT:
+    Print "DATA ENTRY OF MARKS ONLY IN PRACTICAL"
+
+    Input "ENGLISH PRACTICAL: ", EPR
+    Input "NEPALI PRACTICAL: ", NPR
+    Input "COMPULSORY SCIENCE PRACTICAL: ", SPR
+    Input "SOCIAL STUDIES PRACTICAL: ", SSPR
+    Input "HEALTH AND ENVIRONMENT PRACTICAL: ", HPEPR
+    Input "COMPUTER PRACTICAL (?/50): ", O2PR
+    Print
+    Print
+
+    ' ===== VALIDATION =====
+    IF (EPR < 0) OR (EPR > 25) OR (NPR < 0) OR (NPR > 25) OR _
+       (SPR < 0) OR (SPR > 25) OR (SSPR < 0) OR (SSPR > 25) OR _
+       (HPEPR < 0) OR (HPEPR > 25) OR (O2PR < 0) OR (O2PR > 50) THEN
+        Print "DATA ENTRY WAS WRONG. PLEASE RE-ENTER."
+        Print
+        GoTo SECONDINPUT
+    End If
+
+    ' ======= THIRD INPUT BLOCK: THEORY-ONLY SUBJECTS =======
+    THIRDINPUT:
+    Print "DATA ENTRY OF MARKS FOR ONLY THEORY BASED SUBJECTS"
+
+    Input "TOTAL MARKS IN COMPULSORY MATHS: ", M
+    Input "TOTAL MARKS OPTIONAL, MATHS: ", O1
+    Print
+    Print
+
+    ' ===== VALIDATION =====
+    If (M < 0) Or (M > 100) Or (O1 < 0) Or (O1 > 100) Then
+        Print "DATA ENTRY WAS WRONG. PLEASE RE-ENTER."
+        Print
+        GoTo THIRDINPUT
+    End If
+
+    ' ======= CALCULATE TOTALS =======
+    E = ETH + EPR
+    N = NTH + NPR
+    S = STH + SPR
+    SSUB = SSTH + SSPR
+    HPE = HPETH + HPEPR
+    O2 = O2TH + O2PR
+
+    ' ======= WRITE DATA TO FILE =======
+    Write #1, S$, D$, ETH, EPR, E, NTH, NPR, N, M, STH, SPR, S, SSTH, SSPR, SSUB, HPETH, HPEPR, HPE, O1, O2TH, O2PR, O2
+
+    Input "DO YOU WANT TO ADD MORE (Y/N): ", Q$
+Loop While UCase$(Q$) = "Y"
+
+Close #1
+
+' ======= FINAL DISPLAY OF STUDENT DATA =======
+Cls
+Input "PLEASE, ENTER THE SYMBOL NUMBER: ", SSEARCH$
+Input "PLEASE, ENTER THE DATE OF BIRTH: ", DSEARCH$
+
+Open "SHEET.DAT" For Input As #1
+
+foundFlag = 0
+While Not EOF(1)
+    Input #1, SS, DS, ETH, EPR, E, NTH, NPR, N, M, STH, SPR, S, SSTH, SSPR, SSUB, HPETH, HPEPR, HPE, O1, O2TH, O2PR, O2
+    If SS = SSEARCH And DS = DSEARCH Then
+        foundFlag = 1
+        Cls
+
+        ' ======= CALCULATE GPA =======
+        GPAETH = GPACOUNT(ETH, 75)
+        GPANTH = GPACOUNT(NTH, 75)
+        GPASTH = GPACOUNT(STH, 75)
+        GPASSTH = GPACOUNT(SSTH, 75)
+        GPAHPEETH = GPACOUNT(HPETH, 75)
+        GPAO2TH = GPACOUNT(O2TH, 50)
+
+        GPAEPR = GPACOUNT(EPR, 25)
+        GPANPR = GPACOUNT(NPR, 25)
+        GPASPR = GPACOUNT(SPR, 25)
+        GPASSPR = GPACOUNT(SSPR, 25)
+        GPAHPEPR = GPACOUNT(HPEPR, 25)
+        GPAO2PR = GPACOUNT(O2PR, 50)
+
+        GPAM = GPACOUNT(M, 100)
+        GPA01 = GPACOUNT(O1, 100)
+
+        GPAE = GPACOUNT(E, 100)
+        GPAN = GPACOUNT(N, 100)
+        GPAS = GPACOUNT(S, 100)
+        GPASS = GPACOUNT(SSUB, 100)
+        GPAHPE = GPACOUNT(HPE, 100)
+        GPAO2 = GPACOUNT(O2, 100)
+
+        ' ======= CALCULATE FINAL GRADES =======
+        GRADEETH$ = GRADECOUNT$(GPAETH)
+        GRADENTH$ = GRADECOUNT$(GPANTH)
+        GRADESTH$ = GRADECOUNT$(GPASTH)
+        GRADESSTH$ = GRADECOUNT$(GPASSTH)
+        GRADEHPETH$ = GRADECOUNT$(GPAHPEETH)
+        GRADEO2TH$ = GRADECOUNT$(GPAO2TH)
+
+        GRADEEPR$ = GRADECOUNT$(GPAEPR)
+        GRADENPR$ = GRADECOUNT$(GPANPR)
+        GRADESPR$ = GRADECOUNT$(GPASPR)
+        GRADESSPR$ = GRADECOUNT$(GPASSPR)
+        GRADEHPEPR$ = GRADECOUNT$(GPAHPEPR)
+        GRADEO2PR$ = GRADECOUNT$(GPAO2PR)
+
+        GRADEE$ = GRADECOUNT$(GPAE)
+        GRADEN$ = GRADECOUNT$(GPAN)
+        GRADEM$ = GRADECOUNT$(GPAM)
+        GRADE01$ = GRADECOUNT$(GPA01)
+        GRADESS$ = GRADECOUNT$(GPASS)
+        GRADEHPE$ = GRADECOUNT$(GPAHPE)
+        GRADEO2$ = GRADECOUNT$(GPAO2)
+
+        TGPA = (GPAE + GPAN + GPAM + GPAS + GPASS + GPAHPE + GPA01 + GPAO2) / 8
+
+        Select Case TGPA
+            Case 3.65 To 4
+                TGRADES$ = "A+"
+            Case 3.25 To 3.64
+                TGRADES$ = "A"
+            Case 2.85 To 3.24
+                TGRADES$ = "B+"
+            Case 2.45 To 2.84
+                TGRADES$ = "B"
+            Case 2.05 To 2.44
+                TGRADES$ = "C+"
+            Case 1.65 To 2.04
+                TGRADES$ = "C"
+            Case 1.25 To 1.64
+                TGRADES$ = "D+"
+            Case 0.85 To 1.24
+                TGRADES$ = "D"
+            Case 0 To 0.84
+                TGRADES$ = "E"
+            Case Else
+                TGRADES$ = "N/A"
+        End Select
+
+        ' ======= DISPLAY THE RESULT =======
+        Locate 2, 2: Print "DOB: "; DS
+
+        Locate 4, 2: Print "S.N"
+        Locate 4, 8: Print "SUBJECTS"
+        Locate 4, 27: Print "TH. GRADE"
+        Locate 4, 40: Print "PR. GRADE"
+        Locate 4, 53: Print "FINAL GRADE"
+        Locate 4, 68: Print "FINAL GPA"
+
+        Locate 6, 2: Print "1": Locate 6, 8: Print "ENGLISH": Locate 6, 27: Print GRADEETH$: Locate 6, 40: Print GRADEEPR$: Locate 6, 53: Print GRADEE$: Locate 6, 68: Print Using "##0.00"; GPAE
+        Locate 8, 2: Print "2": Locate 8, 8: Print "NEPALI": Locate 8, 27: Print GRADENTH$: Locate 8, 40: Print GRADENPR$: Locate 8, 53: Print GRADEN$: Locate 8, 68: Print Using "##0.00"; GPAN
+        Locate 10, 2: Print "3": Locate 10, 8: Print "MATHS": Locate 10, 27: Print GRADEM$: Locate 10, 40: Print "-": Locate 10, 53: Print GRADEM$: Locate 10, 68: Print Using "##0.00"; GPAM
+        Locate 12, 2: Print "4": Locate 12, 8: Print "C. SCIENCE": Locate 12, 27: Print GRADESTH$: Locate 12, 40: Print GRADESPR$: Locate 12, 53: Print " ": Locate 12, 68: Print Using "##0.00"; GPAS
+        Locate 14, 2: Print "5": Locate 14, 8: Print "SOCIAL STUDIES": Locate 14, 27: Print GRADESSTH$: Locate 14, 40: Print GRADESSPR$: Locate 14, 53: Print " ": Locate 14, 68: Print Using "##0.00"; GPASS
+        Locate 16, 2: Print "6": Locate 16, 8: Print "HPE": Locate 16, 27: Print GRADEHPETH$: Locate 16, 40: Print GRADEHPEPR$: Locate 16, 53: Print GRADEHPE$: Locate 16, 68: Print Using "##0.00"; GPAHPE
+        Locate 18, 2: Print "7": Locate 18, 8: Print "O. MATHS": Locate 18, 27: Print GRADEO2$: Locate 18, 40: Print GRADEO2PR$: Locate 18, 53: Print GRADEO2$: Locate 18, 68: Print Using "##0.00"; GPAO2
+
+        Locate 20, 2: Print "TOTAL GRADE: "; TGRADES$
+        Locate 20, 27: Print "TOTAL GPA: "; Using "##0.00"; TGPA
+
+        GoTo LAST
+    End If
+Wend
+
+Close #1
+Print "NO SUCH RECORD FOUND"
+End
+
+LAST:
+End
+
+'================ FUNCTION GPACOUNT ================
+Function GPACOUNT (X, limit)
+    If limit = 100 Then
+        Select Case X
+            Case 90 To 100: GPA = 4
+            Case 80 To 89: GPA = 3.6
+            Case 70 To 79: GPA = 3.2
+            Case 60 To 69: GPA = 2.8
+            Case 50 To 59: GPA = 2.4
+            Case 40 To 49: GPA = 2
+            Case 30 To 39: GPA = 1.6
+            Case 20 To 29: GPA = 1.4
+            Case 0 To 19: GPA = 0.8
+            Case Else: GPA = 0
+        End Select
+
+    ElseIf limit = 75 Then
+        Select Case X
+            Case 67.5 To 75: GPA = 4
+            Case 60 To 67: GPA = 3.6
+            Case 52.5 To 59.5: GPA = 3.2
+            Case 45 To 52: GPA = 2.8
+            Case 37.5 To 44.5: GPA = 2.4
+            Case 30 To 37: GPA = 2
+            Case 22.5 To 29: GPA = 1.6
+            Case 15 To 22: GPA = 1.4
+            Case 0 To 14.5: GPA = 0.8
+            Case Else: GPA = 0
+        End Select
+
+    ElseIf limit = 50 Then
+        Select Case X
+            Case 45 To 50: GPA = 4
+            Case 40 To 44: GPA = 3.6
+            Case 35 To 39: GPA = 3.2
+            Case 30 To 34: GPA = 2.8
+            Case 25 To 29: GPA = 2.4
+            Case 20 To 24: GPA = 2
+            Case 15 To 19: GPA = 1.6
+            Case 10 To 14: GPA = 1.4
+            Case 0 To 9: GPA = 0.8
+            Case Else: GPA = 0
+        End Select
+
+    ElseIf limit = 25 Then
+        Select Case X
+            Case 23 To 25: GPA = 4
+            Case 20 To 22: GPA = 3.6
+            Case 18 To 19: GPA = 3.2
+            Case 15 To 17: GPA = 2.8
+            Case 13 To 14: GPA = 2.4
+            Case 10 To 12: GPA = 2
+            Case 8 To 9: GPA = 1.6
+            Case 5 To 7: GPA = 1.4
+            Case 0 To 4: GPA = 0.8
+            Case Else: GPA = 0
+        End Select
+    End If
+    GPACOUNT = GPA
+End Function
+
+'=============== FUNCTION GRADECOUNT$ ==================
+Function GRADECOUNT$ (GPA)
+    Select Case GPA
+        Case 3.65 To 4: GRADECOUNT$ = "A+"
+        Case 3.25 To 3.64: GRADECOUNT$ = "A"
+        Case 2.85 To 3.24: GRADECOUNT$ = "B+"
+        Case 2.45 To 2.84: GRADECOUNT$ = "B"
+        Case 2.05 To 2.44: GRADECOUNT$ = "C+"
+        Case 1.65 To 2.04: GRADECOUNT$ = "C"
+        Case 1.25 To 1.64: GRADECOUNT$ = "D+"
+        Case 0.85 To 1.24: GRADECOUNT$ = "D"
+        Case 0 To 0.84: GRADECOUNT$ = "E"
+        Case Else: GRADECOUNT$ = "N/A"
+    End Select
+End Function
